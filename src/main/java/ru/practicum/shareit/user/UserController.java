@@ -2,7 +2,6 @@ package ru.practicum.shareit.user;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -22,8 +21,7 @@ public class UserController {
     private final UserServiceInterface userService;
 
     @PostMapping
-    public UserDto create(final @Valid @RequestBody UserDto dto)
-    {
+    public UserDto create(final @Valid @RequestBody UserDto dto) {
         return userService.create(dto);
     }
 
@@ -38,16 +36,15 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}")
-    public UserDto delete(final @PathVariable Integer userId)
-    {
+    public UserDto delete(final @PathVariable Integer userId) {
         userService.deleteById(userId);
 
         return null;
     }
 
     @GetMapping("/{userId}")
-    public UserDto findById(final @PathVariable Integer userId)
-    {
+    public UserDto findById(final @PathVariable Integer userId) {
         return userService.findById(userId);
     }
+
 }

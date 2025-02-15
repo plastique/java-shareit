@@ -53,10 +53,6 @@ public class UserRepository implements UserRepositoryInterface {
         return users.get(id);
     }
 
-    private Integer getNextId() {
-        return ++increment;
-    }
-
     @Override
     public boolean emailExists(String email) {
         if (email == null) {
@@ -68,6 +64,10 @@ public class UserRepository implements UserRepositoryInterface {
     @Override
     public boolean userExists(Integer id) {
         return id != null && users.containsKey(id);
+    }
+
+    private Integer getNextId() {
+        return ++increment;
     }
 
 }

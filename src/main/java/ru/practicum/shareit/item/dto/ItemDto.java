@@ -11,6 +11,7 @@ import lombok.Data;
 @AllArgsConstructor
 @Builder
 public class ItemDto {
+
     @Nullable
     private Integer id;
 
@@ -22,4 +23,5 @@ public class ItemDto {
 
     @NotNull
     private Boolean available;
+
 }

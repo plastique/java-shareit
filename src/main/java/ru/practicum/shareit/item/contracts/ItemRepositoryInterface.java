@@ -6,6 +6,7 @@ import ru.practicum.shareit.user.User;
 import java.util.List;
 
 public interface ItemRepositoryInterface {
+
     Item create(Item item);
 
     Item update(Item item);
@@ -17,4 +18,5 @@ public interface ItemRepositoryInterface {
     List<Item> findByUserId(Integer userId);
 
     List<Item> findByText(String text);
+
 }

@@ -55,8 +55,8 @@ public class UserService implements UserServiceInterface {
         }
 
         if (
-            !user.getEmail().equals(dto.getEmail())
-            && userRepository.emailExists(dto.getEmail())
+                !user.getEmail().equals(dto.getEmail())
+                        && userRepository.emailExists(dto.getEmail())
         ) {
             throw new NotUniqueEmail("Email already exists");
         }

@@ -15,4 +15,5 @@ public interface ItemServiceInterface {
     List<ItemDto> findItemsByUser(Integer userId);
 
     List<ItemDto> findItemsByText(String text);
+
 }
