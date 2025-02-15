@@ -8,7 +8,6 @@ import ru.practicum.shareit.item.model.Item;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Repository
 public class ItemRepository implements ItemRepositoryInterface {
