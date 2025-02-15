@@ -65,21 +65,21 @@ public class ItemRepository implements ItemRepositoryInterface {
     @Override
     public List<Item> findByUserId(Integer userId) {
         return items.values()
-                    .stream()
-                    .filter(item -> item.getOwner().equals(userId))
-                    .toList();
+                .stream()
+                .filter(item -> item.getOwner().equals(userId))
+                .toList();
     }
 
     @Override
     public List<Item> findByText(String text) {
         return items.values()
-                    .stream()
-                    .filter(Item::getAvailable)
-                    .filter(
-                            item -> item.getName().toLowerCase().contains(text.toLowerCase())
-                                    || item.getDescription().toLowerCase().contains(text.toLowerCase())
-                    )
-                    .toList();
+                .stream()
+                .filter(Item::getAvailable)
+                .filter(
+                        item -> item.getName().toLowerCase().contains(text.toLowerCase())
+                                || item.getDescription().toLowerCase().contains(text.toLowerCase())
+                )
+                .toList();
     }
 
     private Integer getNextId() {
