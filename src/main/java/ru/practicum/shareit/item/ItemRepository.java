@@ -5,6 +5,7 @@ import ru.practicum.shareit.item.contracts.ItemRepositoryInterface;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +75,7 @@ public class ItemRepository implements ItemRepositoryInterface {
     public List<Item> findByText(String text) {
         return items.values()
                 .stream()
-                .filter(Item::getAvailable)
+                .filter(item -> Boolean.TRUE.equals(item.getAvailable()))
                 .filter(
                         item -> item.getName().toLowerCase().contains(text.toLowerCase())
                                 || item.getDescription().toLowerCase().contains(text.toLowerCase())
