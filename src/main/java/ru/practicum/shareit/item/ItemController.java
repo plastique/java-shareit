@@ -39,7 +39,7 @@ public class ItemController {
             final @PathVariable Integer itemId,
             final @RequestHeader(name = X_SHARER_USER_ID) Integer userId
     ) {
-        if (dto.getId() == null) {
+        if (itemId == null) {
             throw new EmptyIdException("Id required");
         }
 
