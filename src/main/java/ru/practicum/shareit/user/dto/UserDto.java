@@ -1,8 +1,9 @@
-package ru.practicum.shareit.item.dto;
+package ru.practicum.shareit.user.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,7 +11,8 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 @Builder
-public class ItemDto {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class UserDto {
 
     @Nullable
     private Integer id;
@@ -18,10 +20,8 @@ public class ItemDto {
     @NotBlank
     private String name;
 
+    @Email
     @NotBlank
-    private String description;
-
-    @NotNull
-    private Boolean available;
+    private String email;
 
 }
