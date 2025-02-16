@@ -20,7 +20,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleNotFoundException(final EmptyId e) {
+    public ErrorResponse handleNotFoundException(final EmptyIdException e) {
         log.warn(e.getMessage());
 
         return new ErrorResponse(e.getMessage());
@@ -28,15 +28,15 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleNotFoundException(final InvalidOwner e) {
+    public ErrorResponse handleNotFoundException(final InvalidOwnerException e) {
         log.warn(e.getMessage());
 
         return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleNotFoundException(final NotUniqueEmail e) {
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleNotFoundException(final NotUniqueEmailException e) {
         log.warn(e.getMessage());
 
         return new ErrorResponse(e.getMessage());

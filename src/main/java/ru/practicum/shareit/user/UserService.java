@@ -3,9 +3,9 @@ package ru.practicum.shareit.user;
 import lombok.AllArgsConstructor;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.NotUniqueEmail;
-import ru.practicum.shareit.exception.EmptyId;
-import ru.practicum.shareit.exception.InvalidEmail;
+import ru.practicum.shareit.exception.NotUniqueEmailException;
+import ru.practicum.shareit.exception.EmptyIdException;
+import ru.practicum.shareit.exception.InvalidEmailException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.contracts.UserRepositoryInterface;
 import ru.practicum.shareit.user.contracts.UserServiceInterface;
@@ -24,7 +24,7 @@ public class UserService implements UserServiceInterface {
         User user = UserMapper.toUser(dto);
 
         if (userRepository.emailExists(user.getEmail())) {
-            throw new NotUniqueEmail("Email already exists");
+            throw new NotUniqueEmailException("Email already exists");
         }
 
         User newUser = userRepository.create(user);
@@ -37,7 +37,7 @@ public class UserService implements UserServiceInterface {
     @Override
     public UserDto update(final UserDto dto) {
         if (dto.getId() == null) {
-            throw new EmptyId("id is empty");
+            throw new EmptyIdException("id is empty");
         }
 
         User user = userRepository.findById(dto.getId());
@@ -58,11 +58,11 @@ public class UserService implements UserServiceInterface {
                 !user.getEmail().equals(dto.getEmail())
                         && userRepository.emailExists(dto.getEmail())
         ) {
-            throw new NotUniqueEmail("Email already exists");
+            throw new NotUniqueEmailException("Email already exists");
         }
 
         if (!isValidateEmail(dto.getEmail())) {
-            throw new InvalidEmail("Email is incorrect");
+            throw new InvalidEmailException("Email is incorrect");
         }
 
         userRepository.update(user);

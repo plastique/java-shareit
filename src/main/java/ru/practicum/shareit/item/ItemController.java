@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.shareit.exception.EmptyIdException;
 import ru.practicum.shareit.item.contracts.ItemServiceInterface;
 import ru.practicum.shareit.item.dto.ItemDto;
 
@@ -38,6 +39,10 @@ public class ItemController {
             final @PathVariable Integer itemId,
             final @RequestHeader(name = X_SHARER_USER_ID) Integer userId
     ) {
+        if (dto.getId() == null) {
+            throw new EmptyIdException("Id required");
+        }
+
         dto.setId(itemId);
 
         return itemService.update(dto, userId);

@@ -6,8 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.item.contracts.ItemRepositoryInterface;
 import ru.practicum.shareit.item.contracts.ItemServiceInterface;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.exception.EmptyId;
-import ru.practicum.shareit.exception.InvalidOwner;
+import ru.practicum.shareit.exception.InvalidOwnerException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.contracts.UserRepositoryInterface;
@@ -27,7 +26,7 @@ public class ItemService implements ItemServiceInterface {
     public ItemDto create(final ItemDto itemDto, final Integer userId) {
 
         if (!userRepository.userExists(userId)) {
-            throw new NotFoundException("User not found");
+            throw new NotFoundException("User with id='%d' not found".formatted(userId));
         }
 
         Item item = ItemMapper.toItem(itemDto);
@@ -41,10 +40,6 @@ public class ItemService implements ItemServiceInterface {
 
     @Override
     public ItemDto update(final ItemDto itemDto, final Integer userId) {
-        if (itemDto.getId() == null) {
-            throw new EmptyId("id is empty");
-        }
-
         if (!userRepository.userExists(userId)) {
             throw new NotFoundException("User not found");
         }
@@ -52,11 +47,11 @@ public class ItemService implements ItemServiceInterface {
         Item item = itemRepository.findById(itemDto.getId());
 
         if (item == null) {
-            throw new NotFoundException("Item not found");
+            throw new NotFoundException("Item with id='%d' not found".formatted(itemDto.getId()));
         }
 
         if (!Objects.equals(item.getOwner(), userId)) {
-            throw new InvalidOwner("Owner is not the same user");
+            throw new InvalidOwnerException("Owner is not the same user");
         }
 
         if (itemDto.getName() != null && !itemDto.getName().isBlank()) {
@@ -84,7 +79,7 @@ public class ItemService implements ItemServiceInterface {
     @Override
     public List<ItemDto> findItemsByUser(final Integer userId) {
         if (!userRepository.userExists(userId)) {
-            throw new NotFoundException("User not found");
+            throw new NotFoundException("User with id='%d' not found".formatted(userId));
         }
 
         return itemRepository
