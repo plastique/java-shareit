@@ -1,19 +1,8 @@
 package ru.practicum.shareit.user.contracts;
 
-import ru.practicum.shareit.user.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import ru.practicum.shareit.user.model.User;
 
-public interface UserRepositoryInterface {
-
-    User create(User user);
-
-    User update(User user);
-
-    void delete(Integer id);
-
-    User findById(Integer id);
-
-    boolean emailExists(String email);
-
-    boolean userExists(Integer id);
-
+public interface UserRepositoryInterface extends JpaRepository<User, Long> {
+    boolean existsByEmail(String email);
 }

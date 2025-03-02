@@ -8,8 +8,8 @@ public interface UserServiceInterface {
 
     UserDto update(UserDto dto);
 
-    UserDto findById(Integer id);
+    UserDto findById(Long id);
 
-    void deleteById(Integer id);
+    void deleteById(Long id);
 
 }

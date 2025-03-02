@@ -15,7 +15,7 @@ import lombok.Data;
 public class UserDto {
 
     @Nullable
-    private Integer id;
+    private Long id;
 
     @NotBlank
     private String name;

@@ -13,7 +13,7 @@ import lombok.Data;
 public class ItemDto {
 
     @Nullable
-    private Integer id;
+    private Long id;
 
     @NotBlank
     private String name;
