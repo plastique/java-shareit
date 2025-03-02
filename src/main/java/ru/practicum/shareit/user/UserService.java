@@ -10,7 +10,9 @@ import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.contracts.UserRepositoryInterface;
 import ru.practicum.shareit.user.contracts.UserServiceInterface;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.model.User;
 
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Service
@@ -23,11 +25,11 @@ public class UserService implements UserServiceInterface {
     public UserDto create(final UserDto dto) {
         User user = UserMapper.toUser(dto);
 
-        if (userRepository.emailExists(user.getEmail())) {
+        if (userRepository.existsByEmail(user.getEmail())) {
             throw new NotUniqueEmailException("Email already exists");
         }
 
-        User newUser = userRepository.create(user);
+        User newUser = userRepository.save(user);
 
         dto.setId(newUser.getId());
 
@@ -40,11 +42,13 @@ public class UserService implements UserServiceInterface {
             throw new EmptyIdException("id is empty");
         }
 
-        User user = userRepository.findById(dto.getId());
+        Optional<User> userOptional = userRepository.findById(dto.getId());
 
-        if (user == null) {
+        if (userOptional.isEmpty()) {
             throw new NotFoundException("User not found");
         }
+
+        User user = userOptional.get();
 
         if (dto.getName() != null && Strings.isNotBlank(dto.getName())) {
             user.setName(dto.getName());
@@ -56,7 +60,7 @@ public class UserService implements UserServiceInterface {
 
         if (
                 !user.getEmail().equals(dto.getEmail())
-                        && userRepository.emailExists(dto.getEmail())
+                        && userRepository.existsByEmail(dto.getEmail())
         ) {
             throw new NotUniqueEmailException("Email already exists");
         }
@@ -65,25 +69,25 @@ public class UserService implements UserServiceInterface {
             throw new InvalidEmailException("Email is incorrect");
         }
 
-        userRepository.update(user);
+        userRepository.save(user);
 
         return dto;
     }
 
     @Override
-    public UserDto findById(final Integer id) {
-        User user = userRepository.findById(id);
+    public UserDto findById(final Long id) {
+        Optional<User> user = userRepository.findById(id);
 
-        if (user == null) {
+        if (user.isEmpty()) {
             throw new NotFoundException("user not found");
         }
 
-        return UserMapper.toUserDto(user);
+        return user.map(UserMapper::toUserDto).orElse(null);
     }
 
     @Override
-    public void deleteById(final Integer id) {
-        userRepository.delete(id);
+    public void deleteById(final Long id) {
+        userRepository.deleteById(id);
     }
 
     private boolean isValidateEmail(String email) {

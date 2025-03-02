@@ -28,7 +28,7 @@ public class ItemController {
     @PostMapping
     public ItemDto create(
             final @Valid @RequestBody ItemDto dto,
-            final @RequestHeader(name = X_SHARER_USER_ID) Integer userId
+            final @RequestHeader(name = X_SHARER_USER_ID) Long userId
     ) {
         return itemService.create(dto, userId);
     }
@@ -36,8 +36,8 @@ public class ItemController {
     @PatchMapping("/{itemId}")
     public ItemDto update(
             final @RequestBody ItemDto dto,
-            final @PathVariable Integer itemId,
-            final @RequestHeader(name = X_SHARER_USER_ID) Integer userId
+            final @PathVariable Long itemId,
+            final @RequestHeader(name = X_SHARER_USER_ID) Long userId
     ) {
         if (itemId == null) {
             throw new EmptyIdException("Id required");
@@ -49,12 +49,12 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItem(final @PathVariable Integer itemId) {
+    public ItemDto getItem(final @PathVariable Long itemId) {
         return itemService.findItemById(itemId);
     }
 
     @GetMapping
-    public List<ItemDto> getItemsByUser(final @RequestHeader(name = X_SHARER_USER_ID) Integer userId) {
+    public List<ItemDto> getItemsByUser(final @RequestHeader(name = X_SHARER_USER_ID) Long userId) {
         return itemService.findItemsByUser(userId);
     }
 

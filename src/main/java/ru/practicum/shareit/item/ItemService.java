@@ -10,47 +10,58 @@ import ru.practicum.shareit.exception.InvalidOwnerException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.contracts.UserRepositoryInterface;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
 @Service
 @AllArgsConstructor
 public class ItemService implements ItemServiceInterface {
 
+    private static final String USER_NOT_FOUND = "User with id='%d' not found";
+
     private final ItemRepositoryInterface itemRepository;
     private final UserRepositoryInterface userRepository;
 
-    public ItemDto create(final ItemDto itemDto, final Integer userId) {
+    @Override
+    public ItemDto create(final ItemDto itemDto, final Long userId) {
 
-        if (!userRepository.userExists(userId)) {
-            throw new NotFoundException("User with id='%d' not found".formatted(userId));
+        Optional<User> user = userRepository.findById(userId);
+
+        if (user.isEmpty()) {
+            throw new NotFoundException(USER_NOT_FOUND.formatted(userId));
         }
 
         Item item = ItemMapper.toItem(itemDto);
-        item.setOwner(userId);
+        item.setOwner(user.get());
 
-        Item newItem = itemRepository.create(item);
+        Item newItem = itemRepository.save(item);
         itemDto.setId(newItem.getId());
 
         return itemDto;
     }
 
     @Override
-    public ItemDto update(final ItemDto itemDto, final Integer userId) {
-        if (!userRepository.userExists(userId)) {
-            throw new NotFoundException("User not found");
+    public ItemDto update(final ItemDto itemDto, final Long userId) {
+        Optional<User> user = userRepository.findById(userId);
+
+        if (user.isEmpty()) {
+            throw new NotFoundException(USER_NOT_FOUND.formatted(userId));
         }
 
-        Item item = itemRepository.findById(itemDto.getId());
+        Optional<Item> itemOptional = itemRepository.findById(itemDto.getId());
 
-        if (item == null) {
+        if (itemOptional.isEmpty()) {
             throw new NotFoundException("Item with id='%d' not found".formatted(itemDto.getId()));
         }
 
-        if (!Objects.equals(item.getOwner(), userId)) {
+        Item item = itemOptional.get();
+
+        if (!Objects.equals(item.getOwner(), user.get())) {
             throw new InvalidOwnerException("Owner is not the same user");
         }
 
@@ -64,26 +75,28 @@ public class ItemService implements ItemServiceInterface {
 
         item.setAvailable(itemDto.getAvailable());
 
-        itemRepository.update(item);
+        itemRepository.save(item);
 
         return itemDto;
     }
 
     @Override
-    public ItemDto findItemById(Integer itemId) {
-        Item item = itemRepository.findById(itemId);
+    public ItemDto findItemById(Long itemId) {
+        Optional<Item> item = itemRepository.findById(itemId);
 
-        return ItemMapper.toItemDto(item);
+        return item.map(ItemMapper::toItemDto).orElse(null);
     }
 
     @Override
-    public List<ItemDto> findItemsByUser(final Integer userId) {
-        if (!userRepository.userExists(userId)) {
-            throw new NotFoundException("User with id='%d' not found".formatted(userId));
+    public List<ItemDto> findItemsByUser(final Long userId) {
+        Optional<User> user = userRepository.findById(userId);
+
+        if (user.isEmpty()) {
+            throw new NotFoundException(USER_NOT_FOUND.formatted(userId));
         }
 
         return itemRepository
-                .findByUserId(userId)
+                .findAllByOwnerId(user.get().getId())
                 .stream()
                 .map(ItemMapper::toItemDto)
                 .toList();
@@ -96,7 +109,7 @@ public class ItemService implements ItemServiceInterface {
         }
 
         return itemRepository
-                .findByText(text)
+                .findAllByText(text)
                 .stream()
                 .map(ItemMapper::toItemDto)
                 .toList();
