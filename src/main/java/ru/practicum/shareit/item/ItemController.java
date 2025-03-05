@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.exception.EmptyIdException;
 import ru.practicum.shareit.item.contracts.ItemServiceInterface;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 
 import java.util.List;
@@ -63,4 +64,14 @@ public class ItemController {
         return itemService.findItemsByText(text);
     }
 
+
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto addComment(
+            final @PathVariable Long itemId,
+            final @RequestBody @Valid CommentDto commentDto,
+            final @RequestHeader(name = X_SHARER_USER_ID) Long userId
+    ) {
+        return itemService.addComment(itemId, userId, commentDto);
+    }
 }

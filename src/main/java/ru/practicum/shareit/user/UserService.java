@@ -3,6 +3,7 @@ package ru.practicum.shareit.user;
 import lombok.AllArgsConstructor;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotUniqueEmailException;
 import ru.practicum.shareit.exception.EmptyIdException;
 import ru.practicum.shareit.exception.InvalidEmailException;
@@ -12,7 +13,6 @@ import ru.practicum.shareit.user.contracts.UserServiceInterface;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Service
@@ -42,13 +42,9 @@ public class UserService implements UserServiceInterface {
             throw new EmptyIdException("id is empty");
         }
 
-        Optional<User> userOptional = userRepository.findById(dto.getId());
-
-        if (userOptional.isEmpty()) {
-            throw new NotFoundException("User not found");
-        }
-
-        User user = userOptional.get();
+        User user = userRepository.findById(dto.getId()).orElseThrow(
+                () -> new NotFoundException("User not found")
+        );
 
         if (dto.getName() != null && Strings.isNotBlank(dto.getName())) {
             user.setName(dto.getName());
@@ -75,14 +71,13 @@ public class UserService implements UserServiceInterface {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDto findById(final Long id) {
-        Optional<User> user = userRepository.findById(id);
+        User user = userRepository.findById(id).orElseThrow(
+                () -> new NotFoundException("User not found")
+        );
 
-        if (user.isEmpty()) {
-            throw new NotFoundException("user not found");
-        }
-
-        return user.map(UserMapper::toUserDto).orElse(null);
+        return UserMapper.toUserDto(user);
     }
 
     @Override
