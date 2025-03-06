@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.shareit.booking.contracts.BookingServiceInterface;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.model.BookingState;
 
 import java.util.List;
@@ -23,11 +25,11 @@ public class BookingController {
 
     public static final String X_SHARER_USER_ID = "X-Sharer-User-Id";
 
-    private BookingService bookingService;
+    private final BookingServiceInterface bookingService;
 
     @PostMapping
     public BookingDto create(
-            final @RequestBody @Valid BookingDto bookingDto,
+            final @RequestBody @Valid BookingCreateDto bookingDto,
             final @RequestHeader(name = X_SHARER_USER_ID) Long bookerId
     ) {
         bookingDto.setBookerId(bookerId);
@@ -60,7 +62,7 @@ public class BookingController {
         return bookingService.getByBookerAndState(bookerId, state);
     }
 
-    @GetMapping
+    @GetMapping("/owner")
     public List<BookingDto> getByOwnerAndState(
             final @RequestParam(required = false) BookingState state,
             final @RequestHeader(name = X_SHARER_USER_ID) Long ownerId

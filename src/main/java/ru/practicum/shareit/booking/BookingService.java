@@ -1,14 +1,17 @@
 package ru.practicum.shareit.booking;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.contracts.BookingRepositoryInterface;
 import ru.practicum.shareit.booking.contracts.BookingServiceInterface;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingState;
+import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.exception.InvalidBookingStatusException;
 import ru.practicum.shareit.exception.InvalidOwnerException;
 import ru.practicum.shareit.exception.ItemUnavailableException;
@@ -20,8 +23,8 @@ import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 @Transactional(readOnly = true)
@@ -37,23 +40,26 @@ public class BookingService implements BookingServiceInterface {
 
     @Override
     @Transactional
-    public BookingDto create(final BookingDto bookingDto) {
+    public BookingDto create(final BookingCreateDto bookingDto) {
 
         Item item = itemRepository.findById(bookingDto.getItemId()).orElseThrow(
                 () -> new NotFoundException("Item with id='%d' not found".formatted(bookingDto.getItemId()))
+        );
+
+        User booker = userRepository.findById(bookingDto.getBookerId()).orElseThrow(
+                () -> new NotFoundException(USER_NOT_FOUND.formatted(bookingDto.getBookerId()))
         );
 
         if (!item.getAvailable()) {
             throw new ItemUnavailableException("Item not available");
         }
 
-        Optional<User> booker = userRepository.findById(bookingDto.getBookerId());
+        Booking booking = new Booking();
 
-        if (booker.isEmpty()) {
-            throw new NotFoundException(USER_NOT_FOUND.formatted(bookingDto.getBookerId()));
-        }
-
-        Booking booking = BookingMapper.toBooking(bookingDto);
+        booking.setItem(item);
+        booking.setBooker(booker);
+        booking.setStart(bookingDto.getStart());
+        booking.setEnd(bookingDto.getEnd());
         booking.setStatus(BookingStatus.WAITING);
 
         return BookingMapper.toBookingDto(

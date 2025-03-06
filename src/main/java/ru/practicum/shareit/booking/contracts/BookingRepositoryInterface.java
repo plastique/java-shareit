@@ -2,7 +2,7 @@ package ru.practicum.shareit.booking.contracts;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
-import ru.practicum.shareit.booking.BookingStatus;
+import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.user.model.User;
 
@@ -40,5 +40,7 @@ public interface BookingRepositoryInterface extends JpaRepository<Booking, Long>
     List<Booking> findAllByItemOwnerAndEndBefore(User owner, LocalDateTime start, Sort sort);
 
     List<Booking> findAllByItemOwnerAndStartAfter(User owner, LocalDateTime start, Sort sort);
+
+    boolean existsByBooker(User booker);
 
 }

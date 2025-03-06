@@ -15,13 +15,4 @@ public class CommentMapper {
         );
     }
 
-    public static Comment toComment(CommentDto dto) {
-        return new Comment(
-                null,
-                dto.getText(),
-                null,
-                null
-        );
-    }
-
 }

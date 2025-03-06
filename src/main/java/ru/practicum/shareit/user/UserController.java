@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.user.contracts.UserServiceInterface;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserCreateDto;
+import ru.practicum.shareit.user.dto.UserUpdateDto;
 
 @RestController
 @RequestMapping(path = "/users")
@@ -21,13 +23,13 @@ public class UserController {
     private final UserServiceInterface userService;
 
     @PostMapping
-    public UserDto create(final @Valid @RequestBody UserDto dto) {
+    public UserDto create(final @Valid @RequestBody UserCreateDto dto) {
         return userService.create(dto);
     }
 
     @PatchMapping("/{userId}")
     public UserDto update(
-            final @RequestBody UserDto dto,
+            final @Valid @RequestBody UserUpdateDto dto,
             final @PathVariable Long userId
     ) {
         dto.setId(userId);

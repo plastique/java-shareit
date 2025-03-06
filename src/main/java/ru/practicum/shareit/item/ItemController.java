@@ -13,8 +13,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.exception.EmptyIdException;
 import ru.practicum.shareit.item.contracts.ItemServiceInterface;
+import ru.practicum.shareit.item.dto.CommentCreateDto;
 import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemCreateDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemUpdateDto;
 
 import java.util.List;
 
@@ -28,7 +31,7 @@ public class ItemController {
 
     @PostMapping
     public ItemDto create(
-            final @Valid @RequestBody ItemDto dto,
+            final @Valid @RequestBody ItemCreateDto dto,
             final @RequestHeader(name = X_SHARER_USER_ID) Long userId
     ) {
         return itemService.create(dto, userId);
@@ -36,7 +39,7 @@ public class ItemController {
 
     @PatchMapping("/{itemId}")
     public ItemDto update(
-            final @RequestBody ItemDto dto,
+            final @Valid @RequestBody ItemUpdateDto dto,
             final @PathVariable Long itemId,
             final @RequestHeader(name = X_SHARER_USER_ID) Long userId
     ) {
@@ -64,12 +67,10 @@ public class ItemController {
         return itemService.findItemsByText(text);
     }
 
-
-
     @PostMapping("/{itemId}/comment")
     public CommentDto addComment(
             final @PathVariable Long itemId,
-            final @RequestBody @Valid CommentDto commentDto,
+            final @RequestBody @Valid CommentCreateDto commentDto,
             final @RequestHeader(name = X_SHARER_USER_ID) Long userId
     ) {
         return itemService.addComment(itemId, userId, commentDto);

@@ -6,14 +6,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotUniqueEmailException;
 import ru.practicum.shareit.exception.EmptyIdException;
-import ru.practicum.shareit.exception.InvalidEmailException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.contracts.UserRepositoryInterface;
 import ru.practicum.shareit.user.contracts.UserServiceInterface;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserCreateDto;
+import ru.practicum.shareit.user.dto.UserUpdateDto;
 import ru.practicum.shareit.user.model.User;
-
-import java.util.regex.Pattern;
 
 @Service
 @AllArgsConstructor
@@ -22,7 +21,7 @@ public class UserService implements UserServiceInterface {
     private final UserRepositoryInterface userRepository;
 
     @Override
-    public UserDto create(final UserDto dto) {
+    public UserDto create(final UserCreateDto dto) {
         User user = UserMapper.toUser(dto);
 
         if (userRepository.existsByEmail(user.getEmail())) {
@@ -31,13 +30,11 @@ public class UserService implements UserServiceInterface {
 
         User newUser = userRepository.save(user);
 
-        dto.setId(newUser.getId());
-
-        return dto;
+        return UserMapper.toUserDto(newUser);
     }
 
     @Override
-    public UserDto update(final UserDto dto) {
+    public UserDto update(final UserUpdateDto dto) {
         if (dto.getId() == null) {
             throw new EmptyIdException("id is empty");
         }
@@ -51,7 +48,7 @@ public class UserService implements UserServiceInterface {
         }
 
         if (dto.getEmail() == null) {
-            return dto;
+            return UserMapper.toUserDto(user);
         }
 
         if (
@@ -61,13 +58,11 @@ public class UserService implements UserServiceInterface {
             throw new NotUniqueEmailException("Email already exists");
         }
 
-        if (!isValidateEmail(dto.getEmail())) {
-            throw new InvalidEmailException("Email is incorrect");
-        }
+        user.setEmail(dto.getEmail());
 
-        userRepository.save(user);
+        user = userRepository.save(user);
 
-        return dto;
+        return UserMapper.toUserDto(user);
     }
 
     @Override
@@ -83,16 +78,6 @@ public class UserService implements UserServiceInterface {
     @Override
     public void deleteById(final Long id) {
         userRepository.deleteById(id);
-    }
-
-    private boolean isValidateEmail(String email) {
-        return email != null && Pattern
-                .compile(
-                        "^([a-z0-9._%+-]+)@([a-z0-9.-]+).([a-z]+)$",
-                        Pattern.CASE_INSENSITIVE
-                )
-                .matcher(email)
-                .matches();
     }
 
 }

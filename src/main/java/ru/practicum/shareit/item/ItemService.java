@@ -4,14 +4,19 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.contracts.BookingRepositoryInterface;
 import ru.practicum.shareit.exception.EmptyIdException;
+import ru.practicum.shareit.exception.UserDoesNotHaveBookedItem;
 import ru.practicum.shareit.item.contracts.CommentRepositoryInterface;
 import ru.practicum.shareit.item.contracts.ItemRepositoryInterface;
 import ru.practicum.shareit.item.contracts.ItemServiceInterface;
+import ru.practicum.shareit.item.dto.CommentCreateDto;
 import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemCreateDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.exception.InvalidOwnerException;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.dto.ItemUpdateDto;
 import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
@@ -34,25 +39,28 @@ public class ItemService implements ItemServiceInterface {
     private final ItemRepositoryInterface itemRepository;
     private final UserRepositoryInterface userRepository;
     private final CommentRepositoryInterface commentRepository;
+    private final BookingRepositoryInterface bookingRepository;
 
     @Override
-    public ItemDto create(final ItemDto itemDto, final Long userId) {
+    public ItemDto create(final ItemCreateDto itemDto, final Long userId) {
 
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new NotFoundException(USER_NOT_FOUND.formatted(userId))
         );
 
-        Item item = ItemMapper.toItem(itemDto);
+        Item item = new Item();
+        item.setName(itemDto.getName());
+        item.setDescription(itemDto.getDescription());
         item.setOwner(user);
+        item.setAvailable(itemDto.getAvailable());
 
         Item newItem = itemRepository.save(item);
-        itemDto.setId(newItem.getId());
 
-        return itemDto;
+        return ItemMapper.toItemDto(newItem);
     }
 
     @Override
-    public ItemDto update(final ItemDto itemDto, final Long userId) {
+    public ItemDto update(final ItemUpdateDto itemDto, final Long userId) {
         if (itemDto.getId() == null) {
             throw new EmptyIdException("Item id is empty");
         }
@@ -77,11 +85,13 @@ public class ItemService implements ItemServiceInterface {
             item.setDescription(itemDto.getDescription());
         }
 
-        item.setAvailable(itemDto.getAvailable());
+        if (itemDto.getAvailable() != null) {
+            item.setAvailable(itemDto.getAvailable());
+        }
 
-        itemRepository.save(item);
+        item = itemRepository.save(item);
 
-        return itemDto;
+        return ItemMapper.toItemDto(item);
     }
 
     @Override
@@ -123,7 +133,7 @@ public class ItemService implements ItemServiceInterface {
     }
 
     @Override
-    public CommentDto addComment(final Long itemId, final Long userId, final CommentDto commentDto) {
+    public CommentDto addComment(final Long itemId, final Long userId, final CommentCreateDto commentDto) {
         Item item = itemRepository.findById(itemId).orElseThrow(
                 () -> new NotFoundException(ITEM_NOT_FOUND.formatted(itemId))
         );
@@ -132,7 +142,12 @@ public class ItemService implements ItemServiceInterface {
                 () -> new NotFoundException(USER_NOT_FOUND.formatted(userId))
         );
 
-        Comment comment = CommentMapper.toComment(commentDto);
+        if (!bookingRepository.existsByBooker(user)) {
+            throw new UserDoesNotHaveBookedItem("User doesn't have booked item");
+        }
+
+        Comment comment = new Comment();
+        comment.setText(commentDto.getText());
         comment.setUser(user);
         comment.setItem(item);
 
