@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.contracts;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.item.model.Item;
@@ -8,6 +9,7 @@ import java.util.List;
 
 public interface ItemRepositoryInterface extends JpaRepository<Item, Long> {
 
+    @EntityGraph(Item.ENTITY_GRAPH_ITEM_OWNER)
     List<Item> findAllByOwnerId(Long ownerId);
 
     @Query(

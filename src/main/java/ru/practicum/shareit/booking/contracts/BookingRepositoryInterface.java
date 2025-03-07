@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking.contracts;
 
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.model.Booking;
@@ -41,6 +42,9 @@ public interface BookingRepositoryInterface extends JpaRepository<Booking, Long>
 
     List<Booking> findAllByItemOwnerAndStartAfter(User owner, LocalDateTime start, Sort sort);
 
-    boolean existsByBooker(User booker);
+    boolean existsByBookerIdAndItemIdAndStatusEqualsAndEndIsBefore(Long bookerId, Long itemId, BookingStatus bookingStatus, LocalDateTime end);
+
+    @EntityGraph(Booking.ENTITY_GRAPH_BOOKING_ITEM)
+    List<Booking> findAllByItem_IdInAndStatus(List<Long> itemIds, BookingStatus bookingStatus, Sort sort);
 
 }

@@ -12,7 +12,6 @@ import lombok.Data;
 @Builder
 public class ItemDto {
 
-    @Nullable
     private Long id;
 
     @NotBlank

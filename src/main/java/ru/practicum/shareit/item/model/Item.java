@@ -8,6 +8,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -23,7 +25,15 @@ import ru.practicum.shareit.user.model.User;
 @AllArgsConstructor
 @Entity
 @Table(name = "items")
+@NamedEntityGraph(
+        name = Item.ENTITY_GRAPH_ITEM_OWNER,
+        attributeNodes = {
+                @NamedAttributeNode("owner")
+        }
+)
 public class Item {
+
+    public static final String ENTITY_GRAPH_ITEM_OWNER = "item.owner";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

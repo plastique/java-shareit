@@ -15,6 +15,7 @@ import ru.practicum.shareit.exception.EmptyIdException;
 import ru.practicum.shareit.item.contracts.ItemServiceInterface;
 import ru.practicum.shareit.item.dto.CommentCreateDto;
 import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemInfoDto;
 import ru.practicum.shareit.item.dto.ItemCreateDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemUpdateDto;
@@ -53,13 +54,13 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItem(final @PathVariable Long itemId) {
+    public ItemInfoDto getItem(final @PathVariable Long itemId) {
         return itemService.findItemById(itemId);
     }
 
     @GetMapping
-    public List<ItemDto> getItemsByUser(final @RequestHeader(name = X_SHARER_USER_ID) Long userId) {
-        return itemService.findItemsByUser(userId);
+    public List<ItemInfoDto> getItemsByOwner(final @RequestHeader(name = X_SHARER_USER_ID) Long ownerId) {
+        return itemService.findItemsByOwner(ownerId);
     }
 
     @GetMapping("/search")
@@ -70,9 +71,9 @@ public class ItemController {
     @PostMapping("/{itemId}/comment")
     public CommentDto addComment(
             final @PathVariable Long itemId,
-            final @RequestBody @Valid CommentCreateDto commentDto,
-            final @RequestHeader(name = X_SHARER_USER_ID) Long userId
+            final @RequestHeader(name = X_SHARER_USER_ID) Long authorId,
+            final @RequestBody @Valid CommentCreateDto commentDto
     ) {
-        return itemService.addComment(itemId, userId, commentDto);
+        return itemService.addComment(itemId, authorId, commentDto);
     }
 }

@@ -10,11 +10,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -26,7 +29,15 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "bookings")
+@NamedEntityGraph(
+        name = Booking.ENTITY_GRAPH_BOOKING_ITEM,
+        attributeNodes = {
+                @NamedAttributeNode(value = "item")
+        }
+)
 public class Booking {
+
+    public static final String ENTITY_GRAPH_BOOKING_ITEM = "booking.item";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

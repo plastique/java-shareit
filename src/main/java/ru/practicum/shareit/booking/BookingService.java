@@ -41,6 +41,7 @@ public class BookingService implements BookingServiceInterface {
     @Override
     @Transactional
     public BookingDto create(final BookingCreateDto bookingDto) {
+        log.info("Creating booking. ItemId - '{}', BookerId - '{}'", bookingDto.getItemId(), bookingDto.getBookerId());
 
         Item item = itemRepository.findById(bookingDto.getItemId()).orElseThrow(
                 () -> new NotFoundException("Item with id='%d' not found".formatted(bookingDto.getItemId()))
@@ -70,6 +71,7 @@ public class BookingService implements BookingServiceInterface {
     @Override
     @Transactional
     public BookingDto approve(final Long id, final Long ownerId, final boolean approved) {
+        log.info("Approve booking with id='{}' and ownerId='{}'", id, ownerId);
 
         Booking booking = bookingRepository.findById(id).orElseThrow(
                 () -> new NotFoundException(BOOKING_NOT_FOUND.formatted(id))
@@ -92,6 +94,8 @@ public class BookingService implements BookingServiceInterface {
 
     @Override
     public BookingDto getById(final Long id, final Long userId) {
+        log.info("Get booking with id '{}' from user with id '{}'", id, userId);
+
         Booking booking = bookingRepository.findById(id).orElseThrow(
                 () -> new NotFoundException(BOOKING_NOT_FOUND.formatted(id))
         );
@@ -100,14 +104,16 @@ public class BookingService implements BookingServiceInterface {
                 booking.getBooker().getId().equals(userId)
                         || booking.getItem().getOwner().getId().equals(userId)
         ) {
-            throw new NotFoundException(BOOKING_NOT_FOUND.formatted(id));
+            return BookingMapper.toBookingDto(booking);
         }
 
-        return BookingMapper.toBookingDto(booking);
+        throw new NotFoundException(BOOKING_NOT_FOUND.formatted(id));
     }
 
     @Override
     public List<BookingDto> getByBookerAndState(final Long bookerId, final BookingState state) {
+        log.info("getByBookerAndState: {}, {}", bookerId, state);
+
         User booker = userRepository.findById(bookerId).orElseThrow(
                 () -> new NotFoundException(USER_NOT_FOUND.formatted(bookerId))
         );
@@ -134,6 +140,8 @@ public class BookingService implements BookingServiceInterface {
 
     @Override
     public List<BookingDto> getByOwnerAndState(Long ownerId, BookingState state) {
+        log.info("getByOwnerAndState: {}, {}", ownerId, state);
+
         User owner = userRepository.findById(ownerId).orElseThrow(
                 () -> new NotFoundException(USER_NOT_FOUND.formatted(ownerId))
         );

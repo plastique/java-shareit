@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.contracts;
 
 import ru.practicum.shareit.item.dto.CommentCreateDto;
 import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemInfoDto;
 import ru.practicum.shareit.item.dto.ItemCreateDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemUpdateDto;
@@ -14,9 +15,9 @@ public interface ItemServiceInterface {
 
     ItemDto update(ItemUpdateDto itemDto, Long userId);
 
-    ItemDto findItemById(Long itemId);
+    ItemInfoDto findItemById(Long itemId);
 
-    List<ItemDto> findItemsByUser(Long userId);
+    List<ItemInfoDto> findItemsByOwner(Long userId);
 
     List<ItemDto> findItemsByText(String text);
 

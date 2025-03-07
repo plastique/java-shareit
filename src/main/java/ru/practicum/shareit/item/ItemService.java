@@ -2,9 +2,12 @@ package ru.practicum.shareit.item;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.contracts.BookingRepositoryInterface;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.exception.EmptyIdException;
 import ru.practicum.shareit.exception.UserDoesNotHaveBookedItem;
 import ru.practicum.shareit.item.contracts.CommentRepositoryInterface;
@@ -12,6 +15,7 @@ import ru.practicum.shareit.item.contracts.ItemRepositoryInterface;
 import ru.practicum.shareit.item.contracts.ItemServiceInterface;
 import ru.practicum.shareit.item.dto.CommentCreateDto;
 import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemInfoDto;
 import ru.practicum.shareit.item.dto.ItemCreateDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.exception.InvalidOwnerException;
@@ -24,9 +28,14 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.contracts.UserRepositoryInterface;
 import ru.practicum.shareit.user.model.User;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Service
@@ -41,8 +50,12 @@ public class ItemService implements ItemServiceInterface {
     private final CommentRepositoryInterface commentRepository;
     private final BookingRepositoryInterface bookingRepository;
 
+    private final Sort commentsSort = Sort.by(Sort.Direction.DESC, "created");
+    private final Sort bookingOrder = Sort.by(Sort.Direction.ASC, "start");
+
     @Override
     public ItemDto create(final ItemCreateDto itemDto, final Long userId) {
+        log.info("Creating Item: {}, userId - '{}'", itemDto.getName(), userId);
 
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new NotFoundException(USER_NOT_FOUND.formatted(userId))
@@ -61,6 +74,8 @@ public class ItemService implements ItemServiceInterface {
 
     @Override
     public ItemDto update(final ItemUpdateDto itemDto, final Long userId) {
+        log.info("Updating Item: {}, userId - '{}'", itemDto.getId(), userId);
+
         if (itemDto.getId() == null) {
             throw new EmptyIdException("Item id is empty");
         }
@@ -96,31 +111,79 @@ public class ItemService implements ItemServiceInterface {
 
     @Override
     @Transactional(readOnly = true)
-    public ItemDto findItemById(Long itemId) {
+    public ItemInfoDto findItemById(Long itemId) {
+        log.info("Finding Item with id: '{}'", itemId);
+
         Item item = itemRepository.findById(itemId).orElseThrow(
                 () -> new NotFoundException(ITEM_NOT_FOUND.formatted(itemId))
         );
 
-        return ItemMapper.toItemDto(item);
+        List<Booking> bookings = bookingRepository.findAllByItem_IdInAndStatus(
+                List.of(item.getId()),
+                BookingStatus.APPROVED,
+                bookingOrder
+        );
+
+        LocalDateTime currentTime = LocalDateTime.now();
+
+        return ItemMapper.toItemCardDto(
+                item,
+                commentRepository.findAllByItem_Id(item.getId(), commentsSort),
+                getLastBooking(bookings, currentTime),
+                getNextBooking(bookings, currentTime)
+        );
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemDto> findItemsByUser(final Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new NotFoundException(USER_NOT_FOUND.formatted(userId))
+    public List<ItemInfoDto> findItemsByOwner(final Long ownerId) {
+        log.info("Finding Items by owner with id: '{}'", ownerId);
+
+        User user = userRepository.findById(ownerId).orElseThrow(
+                () -> new NotFoundException(USER_NOT_FOUND.formatted(ownerId))
         );
 
-        return itemRepository
-                .findAllByOwnerId(user.getId())
+        List<Item> items = itemRepository.findAllByOwnerId(user.getId());
+
+        if (items.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Long> itemIds = items.stream().map(Item::getId).toList();
+        Map<Long, List<Comment>> comments = commentRepository
+                .findAllByItem_IdIn(itemIds, commentsSort)
                 .stream()
-                .map(ItemMapper::toItemDto)
+                .collect(groupingBy(comment -> comment.getItem().getId(), toList()));
+
+        Map<Long, List<Booking>> bookings = bookingRepository
+                .findAllByItem_IdInAndStatus(itemIds, BookingStatus.APPROVED, bookingOrder)
+                .stream()
+                .collect(groupingBy(booking -> booking.getItem().getId(), toList()));
+
+        LocalDateTime curDateTime = LocalDateTime.now();
+
+        return items
+                .stream()
+                .map(item -> ItemMapper.toItemCardDto(
+                        item,
+                        comments.getOrDefault(item.getId(), Collections.emptyList()),
+                        getLastBooking(
+                                bookings.getOrDefault(item.getId(), Collections.emptyList()),
+                                curDateTime
+                        ),
+                        getNextBooking(
+                                bookings.getOrDefault(item.getId(), Collections.emptyList()),
+                                curDateTime
+                        )
+                ))
                 .toList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<ItemDto> findItemsByText(final String text) {
+        log.info("Finding Items by text: '{}'", text);
+
         if (text == null || text.isEmpty()) {
             return Collections.emptyList();
         }
@@ -133,27 +196,58 @@ public class ItemService implements ItemServiceInterface {
     }
 
     @Override
-    public CommentDto addComment(final Long itemId, final Long userId, final CommentCreateDto commentDto) {
+    public CommentDto addComment(final Long itemId, final Long authorId, final CommentCreateDto commentDto) {
+        log.info("Add comment: itemId - '{}', authorId - '{}'", itemId, authorId);
+
         Item item = itemRepository.findById(itemId).orElseThrow(
                 () -> new NotFoundException(ITEM_NOT_FOUND.formatted(itemId))
         );
 
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new NotFoundException(USER_NOT_FOUND.formatted(userId))
+        User author = userRepository.findById(authorId).orElseThrow(
+                () -> new NotFoundException(USER_NOT_FOUND.formatted(authorId))
         );
 
-        if (!bookingRepository.existsByBooker(user)) {
+        if (
+                !bookingRepository.existsByBookerIdAndItemIdAndStatusEqualsAndEndIsBefore(
+                        author.getId(),
+                        item.getId(),
+                        BookingStatus.APPROVED,
+                        LocalDateTime.now()
+                )
+        ) {
             throw new UserDoesNotHaveBookedItem("User doesn't have booked item");
         }
 
         Comment comment = new Comment();
         comment.setText(commentDto.getText());
-        comment.setUser(user);
+        comment.setAuthor(author);
         comment.setItem(item);
+        comment.setCreated(LocalDateTime.now());
 
         commentRepository.save(comment);
 
         return CommentMapper.toCommentDto(comment);
     }
 
+    private static Booking getNextBooking(List<Booking> bookings, LocalDateTime curDateTime) {
+        if (bookings == null || bookings.isEmpty()) {
+            return null;
+        }
+
+        return bookings.stream()
+                       .filter(booking -> booking.getStart().isAfter(curDateTime))
+                       .findFirst()
+                       .orElse(null);
+    }
+
+    private static Booking getLastBooking(List<Booking> bookings, LocalDateTime curDateTime) {
+        if (bookings == null || bookings.isEmpty()) {
+            return null;
+        }
+
+        return bookings.stream()
+                       .filter(booking -> !booking.getStart().isAfter(curDateTime))
+                       .reduce((a, b) -> a.getStart().isAfter(b.getStart()) ? a : b)
+                       .orElse(null);
+    }
 }

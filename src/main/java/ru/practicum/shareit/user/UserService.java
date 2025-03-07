@@ -1,6 +1,7 @@
 package ru.practicum.shareit.user;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +15,7 @@ import ru.practicum.shareit.user.dto.UserCreateDto;
 import ru.practicum.shareit.user.dto.UserUpdateDto;
 import ru.practicum.shareit.user.model.User;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class UserService implements UserServiceInterface {
@@ -22,6 +24,8 @@ public class UserService implements UserServiceInterface {
 
     @Override
     public UserDto create(final UserCreateDto dto) {
+        log.info("Creating user: {}", dto.toString());
+
         User user = UserMapper.toUser(dto);
 
         if (userRepository.existsByEmail(user.getEmail())) {
@@ -35,6 +39,8 @@ public class UserService implements UserServiceInterface {
 
     @Override
     public UserDto update(final UserUpdateDto dto) {
+        log.info("Updating user: {}", dto.toString());
+
         if (dto.getId() == null) {
             throw new EmptyIdException("id is empty");
         }
@@ -68,6 +74,8 @@ public class UserService implements UserServiceInterface {
     @Override
     @Transactional(readOnly = true)
     public UserDto findById(final Long id) {
+        log.info("Finding user by id: {}", id);
+
         User user = userRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("User not found")
         );
@@ -77,6 +85,8 @@ public class UserService implements UserServiceInterface {
 
     @Override
     public void deleteById(final Long id) {
+        log.info("Deleting user by id: {}", id);
+
         userRepository.deleteById(id);
     }
 

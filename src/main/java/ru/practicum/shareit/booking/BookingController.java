@@ -59,7 +59,10 @@ public class BookingController {
             final @RequestParam(required = false) BookingState state,
             final @RequestHeader(name = X_SHARER_USER_ID) Long bookerId
     ) {
-        return bookingService.getByBookerAndState(bookerId, state);
+        return bookingService.getByBookerAndState(
+                bookerId,
+                state == null ? BookingState.ALL : state
+        );
     }
 
     @GetMapping("/owner")
