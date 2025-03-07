@@ -15,7 +15,7 @@ public interface ItemServiceInterface {
 
     ItemDto update(ItemUpdateDto itemDto, Long userId);
 
-    ItemInfoDto findItemById(Long itemId);
+    ItemInfoDto findItemById(Long itemId, Long userId);
 
     List<ItemInfoDto> findItemsByOwner(Long userId);
 

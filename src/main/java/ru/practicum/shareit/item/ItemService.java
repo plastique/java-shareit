@@ -111,18 +111,22 @@ public class ItemService implements ItemServiceInterface {
 
     @Override
     @Transactional(readOnly = true)
-    public ItemInfoDto findItemById(Long itemId) {
+    public ItemInfoDto findItemById(Long itemId, Long userId) {
         log.info("Finding Item with id: '{}'", itemId);
 
         Item item = itemRepository.findById(itemId).orElseThrow(
                 () -> new NotFoundException(ITEM_NOT_FOUND.formatted(itemId))
         );
 
-        List<Booking> bookings = bookingRepository.findAllByItem_IdInAndStatus(
-                List.of(item.getId()),
-                BookingStatus.APPROVED,
-                bookingOrder
-        );
+        List<Booking> bookings = Collections.emptyList();
+
+        if (item.getOwner().getId().equals(userId)) {
+            bookings = bookingRepository.findAllByItem_IdInAndStatus(
+                    List.of(item.getId()),
+                    BookingStatus.APPROVED,
+                    bookingOrder
+            );
+        }
 
         LocalDateTime currentTime = LocalDateTime.now();
 
@@ -247,7 +251,7 @@ public class ItemService implements ItemServiceInterface {
 
         return bookings.stream()
                        .filter(booking -> !booking.getStart().isAfter(curDateTime))
-                       .reduce((a, b) -> a.getStart().isAfter(b.getStart()) ? a : b)
+                       .reduce((a, b) -> b)
                        .orElse(null);
     }
 }
