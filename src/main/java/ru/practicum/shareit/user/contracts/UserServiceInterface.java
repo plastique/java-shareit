@@ -1,15 +1,17 @@
 package ru.practicum.shareit.user.contracts;
 
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserCreateDto;
+import ru.practicum.shareit.user.dto.UserUpdateDto;
 
 public interface UserServiceInterface {
 
-    UserDto create(UserDto dto);
+    UserDto create(UserCreateDto dto);
 
-    UserDto update(UserDto dto);
+    UserDto update(UserUpdateDto dto);
 
-    UserDto findById(Integer id);
+    UserDto findById(Long id);
 
-    void deleteById(Integer id);
+    void deleteById(Long id);
 
 }

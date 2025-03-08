@@ -13,7 +13,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.exception.EmptyIdException;
 import ru.practicum.shareit.item.contracts.ItemServiceInterface;
+import ru.practicum.shareit.item.dto.CommentCreateDto;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemInfoDto;
+import ru.practicum.shareit.item.dto.ItemCreateDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemUpdateDto;
 
 import java.util.List;
 
@@ -27,17 +32,17 @@ public class ItemController {
 
     @PostMapping
     public ItemDto create(
-            final @Valid @RequestBody ItemDto dto,
-            final @RequestHeader(name = X_SHARER_USER_ID) Integer userId
+            final @Valid @RequestBody ItemCreateDto dto,
+            final @RequestHeader(name = X_SHARER_USER_ID) Long userId
     ) {
         return itemService.create(dto, userId);
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto update(
-            final @RequestBody ItemDto dto,
-            final @PathVariable Integer itemId,
-            final @RequestHeader(name = X_SHARER_USER_ID) Integer userId
+            final @Valid @RequestBody ItemUpdateDto dto,
+            final @PathVariable Long itemId,
+            final @RequestHeader(name = X_SHARER_USER_ID) Long userId
     ) {
         if (itemId == null) {
             throw new EmptyIdException("Id required");
@@ -49,13 +54,16 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItem(final @PathVariable Integer itemId) {
-        return itemService.findItemById(itemId);
+    public ItemInfoDto getItem(
+            final @PathVariable Long itemId,
+            final @RequestHeader(name = X_SHARER_USER_ID) Long userId
+    ) {
+        return itemService.findItemById(itemId, userId);
     }
 
     @GetMapping
-    public List<ItemDto> getItemsByUser(final @RequestHeader(name = X_SHARER_USER_ID) Integer userId) {
-        return itemService.findItemsByUser(userId);
+    public List<ItemInfoDto> getItemsByOwner(final @RequestHeader(name = X_SHARER_USER_ID) Long ownerId) {
+        return itemService.findItemsByOwner(ownerId);
     }
 
     @GetMapping("/search")
@@ -63,4 +71,12 @@ public class ItemController {
         return itemService.findItemsByText(text);
     }
 
+    @PostMapping("/{itemId}/comment")
+    public CommentDto addComment(
+            final @PathVariable Long itemId,
+            final @RequestHeader(name = X_SHARER_USER_ID) Long authorId,
+            final @RequestBody @Valid CommentCreateDto commentDto
+    ) {
+        return itemService.addComment(itemId, authorId, commentDto);
+    }
 }
