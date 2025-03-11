@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.dto;
 
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -19,5 +20,8 @@ public class ItemCreateDto {
 
     @NotNull
     private Boolean available;
+
+    @Nullable
+    private Long requestId;
 
 }

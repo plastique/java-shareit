@@ -25,6 +25,8 @@ import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.contracts.ItemRequestRepositoryInterface;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.contracts.UserRepositoryInterface;
 import ru.practicum.shareit.user.model.User;
 
@@ -49,6 +51,7 @@ public class ItemService implements ItemServiceInterface {
     private final UserRepositoryInterface userRepository;
     private final CommentRepositoryInterface commentRepository;
     private final BookingRepositoryInterface bookingRepository;
+    private final ItemRequestRepositoryInterface itemRequestRepositoryInterface;
 
     private final Sort commentsSort = Sort.by(Sort.Direction.DESC, "created");
     private final Sort bookingOrder = Sort.by(Sort.Direction.ASC, "start");
@@ -61,11 +64,23 @@ public class ItemService implements ItemServiceInterface {
                 () -> new NotFoundException(USER_NOT_FOUND.formatted(userId))
         );
 
+        ItemRequest itemRequest = null;
+
+        if (itemDto.getRequestId() == null) {
+            itemRequest = itemRequestRepositoryInterface.findById(itemDto.getRequestId()).orElseThrow(
+                    () -> new NotFoundException("Item request with id='%d' not found".formatted(itemDto.getRequestId()))
+            );
+        }
+
         Item item = new Item();
         item.setName(itemDto.getName());
         item.setDescription(itemDto.getDescription());
         item.setOwner(user);
         item.setAvailable(itemDto.getAvailable());
+
+        if (itemRequest != null) {
+            item.setRequest(itemRequest);
+        }
 
         Item newItem = itemRepository.save(item);
 
