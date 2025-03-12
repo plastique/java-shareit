@@ -1,7 +1,8 @@
 package ru.practicum.shareit.booking;
 
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +25,6 @@ import ru.practicum.shareit.user.model.User;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Slf4j
 @Service
 @AllArgsConstructor
 @Transactional(readOnly = true)
@@ -41,7 +41,6 @@ public class BookingService implements BookingServiceInterface {
     @Override
     @Transactional
     public BookingDto create(final BookingCreateDto bookingDto) {
-        log.info("Creating booking. ItemId - '{}', BookerId - '{}'", bookingDto.getItemId(), bookingDto.getBookerId());
 
         Item item = itemRepository.findById(bookingDto.getItemId()).orElseThrow(
                 () -> new NotFoundException("Item with id='%d' not found".formatted(bookingDto.getItemId()))
@@ -71,7 +70,6 @@ public class BookingService implements BookingServiceInterface {
     @Override
     @Transactional
     public BookingDto approve(final Long id, final Long ownerId, final boolean approved) {
-        log.info("Approve booking with id='{}' and ownerId='{}'", id, ownerId);
 
         Booking booking = bookingRepository.findById(id).orElseThrow(
                 () -> new NotFoundException(BOOKING_NOT_FOUND.formatted(id))
@@ -94,7 +92,6 @@ public class BookingService implements BookingServiceInterface {
 
     @Override
     public BookingDto getById(final Long id, final Long userId) {
-        log.info("Get booking with id '{}' from user with id '{}'", id, userId);
 
         Booking booking = bookingRepository.findById(id).orElseThrow(
                 () -> new NotFoundException(BOOKING_NOT_FOUND.formatted(id))
@@ -111,25 +108,26 @@ public class BookingService implements BookingServiceInterface {
     }
 
     @Override
-    public List<BookingDto> getByBookerAndState(final Long bookerId, final BookingState state) {
-        log.info("getByBookerAndState: {}, {}", bookerId, state);
+    public List<BookingDto> getByBookerAndState(final Long bookerId, final BookingState state, final Integer from, final Integer size) {
 
         User booker = userRepository.findById(bookerId).orElseThrow(
                 () -> new NotFoundException(USER_NOT_FOUND.formatted(bookerId))
         );
 
+        Pageable pageable = PageRequest.of(from, size, sort);
+
         List<Booking> list = switch (state) {
-            case WAITING -> bookingRepository.findAllByBookerAndStatus(booker, BookingStatus.WAITING, sort);
-            case REJECTED -> bookingRepository.findAllByBookerAndStatus(booker, BookingStatus.REJECTED, sort);
+            case WAITING -> bookingRepository.findAllByBookerAndStatus(booker, BookingStatus.WAITING, pageable);
+            case REJECTED -> bookingRepository.findAllByBookerAndStatus(booker, BookingStatus.REJECTED, pageable);
             case CURRENT -> bookingRepository.findAllByBookerAndStartBeforeAndEndAfter(
                     booker,
                     LocalDateTime.now(),
                     LocalDateTime.now(),
-                    sort
+                    pageable
             );
-            case PAST -> bookingRepository.findAllByBookerAndEndBefore(booker, LocalDateTime.now(), sort);
-            case FUTURE -> bookingRepository.findAllByBookerAndStartAfter(booker, LocalDateTime.now(), sort);
-            default -> bookingRepository.findAllByBooker(booker, sort);
+            case PAST -> bookingRepository.findAllByBookerAndEndBefore(booker, LocalDateTime.now(), pageable);
+            case FUTURE -> bookingRepository.findAllByBookerAndStartAfter(booker, LocalDateTime.now(), pageable);
+            default -> bookingRepository.findAllByBooker(booker, pageable);
         };
 
         return list
@@ -139,25 +137,26 @@ public class BookingService implements BookingServiceInterface {
     }
 
     @Override
-    public List<BookingDto> getByOwnerAndState(Long ownerId, BookingState state) {
-        log.info("getByOwnerAndState: {}, {}", ownerId, state);
+    public List<BookingDto> getByOwnerAndState(final Long ownerId, final BookingState state, final Integer from, final Integer size) {
 
         User owner = userRepository.findById(ownerId).orElseThrow(
                 () -> new NotFoundException(USER_NOT_FOUND.formatted(ownerId))
         );
 
+        Pageable pageable = PageRequest.of(from, size, sort);
+
         List<Booking> list = switch (state) {
-            case WAITING -> bookingRepository.findAllByItemOwnerAndStatus(owner, BookingStatus.WAITING, sort);
-            case REJECTED -> bookingRepository.findAllByItemOwnerAndStatus(owner, BookingStatus.REJECTED, sort);
+            case WAITING -> bookingRepository.findAllByItemOwnerAndStatus(owner, BookingStatus.WAITING, pageable);
+            case REJECTED -> bookingRepository.findAllByItemOwnerAndStatus(owner, BookingStatus.REJECTED, pageable);
             case CURRENT -> bookingRepository.findAllByItemOwnerAndStartBeforeAndEndAfter(
                     owner,
                     LocalDateTime.now(),
                     LocalDateTime.now(),
-                    sort
+                    pageable
             );
-            case PAST -> bookingRepository.findAllByItemOwnerAndEndBefore(owner, LocalDateTime.now(), sort);
-            case FUTURE -> bookingRepository.findAllByItemOwnerAndStartAfter(owner, LocalDateTime.now(), sort);
-            default -> bookingRepository.findAllByItemOwner(owner, sort);
+            case PAST -> bookingRepository.findAllByItemOwnerAndEndBefore(owner, LocalDateTime.now(), pageable);
+            case FUTURE -> bookingRepository.findAllByItemOwnerAndStartAfter(owner, LocalDateTime.now(), pageable);
+            default -> bookingRepository.findAllByItemOwner(owner, pageable);
         };
 
         return list

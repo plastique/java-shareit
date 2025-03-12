@@ -1,6 +1,5 @@
 package ru.practicum.shareit.booking;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -23,14 +22,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BookingController {
 
-    public static final String X_SHARER_USER_ID = "X-Sharer-User-Id";
+    public static final String HEADER_USER_ID = "X-Sharer-User-Id";
 
     private final BookingServiceInterface bookingService;
 
     @PostMapping
     public BookingDto create(
-            final @RequestBody @Valid BookingCreateDto bookingDto,
-            final @RequestHeader(name = X_SHARER_USER_ID) Long bookerId
+            final @RequestBody BookingCreateDto bookingDto,
+            final @RequestHeader(name = HEADER_USER_ID) Long bookerId
     ) {
         bookingDto.setBookerId(bookerId);
 
@@ -41,7 +40,7 @@ public class BookingController {
     public BookingDto approve(
         final @PathVariable Long bookingId,
         final @RequestParam boolean approved,
-        final @RequestHeader(name = X_SHARER_USER_ID) Long ownerId
+        final @RequestHeader(name = HEADER_USER_ID) Long ownerId
     ) {
         return bookingService.approve(bookingId, ownerId, approved);
     }
@@ -49,7 +48,7 @@ public class BookingController {
     @GetMapping("/{bookingId}")
     public BookingDto getById(
             final @PathVariable Long bookingId,
-            final @RequestHeader(name = X_SHARER_USER_ID) Long userId
+            final @RequestHeader(name = HEADER_USER_ID) Long userId
     ) {
         return bookingService.getById(bookingId, userId);
     }
@@ -57,20 +56,26 @@ public class BookingController {
     @GetMapping
     public List<BookingDto> getByBookerAndState(
             final @RequestParam(required = false) BookingState state,
-            final @RequestHeader(name = X_SHARER_USER_ID) Long bookerId
+            final @RequestHeader(name = HEADER_USER_ID) Long bookerId,
+            final @RequestParam(value = "from", defaultValue = "0") Integer from,
+            final @RequestParam(value = "size", defaultValue = "10") Integer size
     ) {
         return bookingService.getByBookerAndState(
                 bookerId,
-                state == null ? BookingState.ALL : state
+                state == null ? BookingState.ALL : state,
+                from,
+                size
         );
     }
 
     @GetMapping("/owner")
     public List<BookingDto> getByOwnerAndState(
             final @RequestParam(required = false) BookingState state,
-            final @RequestHeader(name = X_SHARER_USER_ID) Long ownerId
+            final @RequestHeader(name = HEADER_USER_ID) Long ownerId,
+            final @RequestParam(value = "from", defaultValue = "0") Integer from,
+            final @RequestParam(value = "size", defaultValue = "10") Integer size
     ) {
-        return bookingService.getByOwnerAndState(ownerId, state);
+        return bookingService.getByOwnerAndState(ownerId, state, from, size);
     }
 
 }

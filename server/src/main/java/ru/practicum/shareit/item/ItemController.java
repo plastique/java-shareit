@@ -1,6 +1,5 @@
 package ru.practicum.shareit.item;
 
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -27,22 +26,22 @@ import java.util.List;
 @AllArgsConstructor
 public class ItemController {
 
-    public static final String X_SHARER_USER_ID = "X-Sharer-User-Id";
+    private static final String HEADER_USER_ID = "X-Sharer-User-Id";
     private ItemServiceInterface itemService;
 
     @PostMapping
     public ItemDto create(
-            final @Valid @RequestBody ItemCreateDto dto,
-            final @RequestHeader(name = X_SHARER_USER_ID) Long userId
+            final @RequestBody ItemCreateDto dto,
+            final @RequestHeader(name = HEADER_USER_ID) Long userId
     ) {
         return itemService.create(dto, userId);
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto update(
-            final @Valid @RequestBody ItemUpdateDto dto,
+            final @RequestBody ItemUpdateDto dto,
             final @PathVariable Long itemId,
-            final @RequestHeader(name = X_SHARER_USER_ID) Long userId
+            final @RequestHeader(name = HEADER_USER_ID) Long userId
     ) {
         if (itemId == null) {
             throw new EmptyIdException("Id required");
@@ -56,13 +55,13 @@ public class ItemController {
     @GetMapping("/{itemId}")
     public ItemInfoDto getItem(
             final @PathVariable Long itemId,
-            final @RequestHeader(name = X_SHARER_USER_ID) Long userId
+            final @RequestHeader(name = HEADER_USER_ID) Long userId
     ) {
         return itemService.findItemById(itemId, userId);
     }
 
     @GetMapping
-    public List<ItemInfoDto> getItemsByOwner(final @RequestHeader(name = X_SHARER_USER_ID) Long ownerId) {
+    public List<ItemInfoDto> getItemsByOwner(final @RequestHeader(name = HEADER_USER_ID) Long ownerId) {
         return itemService.findItemsByOwner(ownerId);
     }
 
@@ -74,8 +73,8 @@ public class ItemController {
     @PostMapping("/{itemId}/comment")
     public CommentDto addComment(
             final @PathVariable Long itemId,
-            final @RequestHeader(name = X_SHARER_USER_ID) Long authorId,
-            final @RequestBody @Valid CommentCreateDto commentDto
+            final @RequestHeader(name = HEADER_USER_ID) Long authorId,
+            final @RequestBody CommentCreateDto commentDto
     ) {
         return itemService.addComment(itemId, authorId, commentDto);
     }
