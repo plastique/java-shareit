@@ -13,36 +13,28 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import ru.practicum.shareit.booking.dto.BookItemRequestDto;
 import ru.practicum.shareit.booking.dto.BookingState;
 
 @Controller
 @RequestMapping(path = "/bookings")
 @RequiredArgsConstructor
-@Slf4j
 @Validated
 public class BookingController {
 
     private static final String HEADER_USER_ID = "X-Sharer-User-Id";
-    private static final String LOG_GET_LIST_BY_PARAMS = "Get booking with state {}, userId={}, from={}, size={}";
 
     private final BookingClient bookingClient;
 
     @GetMapping
     public ResponseEntity<Object> getBookings(
             @RequestHeader(HEADER_USER_ID) long userId,
-            @RequestParam(name = "state", defaultValue = "all") String stateParam,
-            @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
-            @Positive @RequestParam(name = "size", defaultValue = "10") Integer size
+            @RequestParam(name = "state", defaultValue = "all") String stateParam
     ) {
         BookingState state = getBookingState(stateParam);
 
-        log.info(LOG_GET_LIST_BY_PARAMS, stateParam, userId, from, size);
-        return bookingClient.getBookings(userId, state, from, size);
+        return bookingClient.getBookings(userId, state);
     }
 
     @PostMapping
@@ -50,7 +42,6 @@ public class BookingController {
             @RequestHeader(HEADER_USER_ID) long userId,
             @RequestBody @Valid BookItemRequestDto requestDto
     ) {
-        log.info("Creating booking {}, userId={}", requestDto, userId);
         return bookingClient.bookItem(userId, requestDto);
     }
 
@@ -68,21 +59,17 @@ public class BookingController {
             @RequestHeader(HEADER_USER_ID) long userId,
             @PathVariable Long bookingId
     ) {
-        log.info("Get booking {}, userId={}", bookingId, userId);
         return bookingClient.getBooking(userId, bookingId);
     }
 
     @GetMapping("/owner")
     public ResponseEntity<Object> getByOwnerAndState(
             @RequestParam(required = false, defaultValue = "all") String stateParam,
-            @RequestHeader(name = HEADER_USER_ID) Long ownerId,
-            @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
-            @Positive @RequestParam(name = "size", defaultValue = "10") Integer size
+            @RequestHeader(name = HEADER_USER_ID) Long ownerId
     ) {
         BookingState state = getBookingState(stateParam);
 
-        log.info(LOG_GET_LIST_BY_PARAMS, stateParam, ownerId, from, size);
-        return bookingClient.getByOwnerAndState(ownerId, state, from, size);
+        return bookingClient.getByOwnerAndState(ownerId, state);
     }
 
     private static BookingState getBookingState(String stateParam) {

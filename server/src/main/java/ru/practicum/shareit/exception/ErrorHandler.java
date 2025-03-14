@@ -10,10 +10,12 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class ErrorHandler {
 
+    private static final String ERROR_LOG_MESSAGE = "Server error ({}): {}";
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(final NotFoundException e) {
-        log.warn(e.getMessage());
+        log.warn(ERROR_LOG_MESSAGE, HttpStatus.NOT_FOUND, e.getMessage());
 
         return new ErrorResponse(e.getMessage());
     }
@@ -21,7 +23,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleNotFoundException(final EmptyIdException e) {
-        log.warn(e.getMessage());
+        log.warn(ERROR_LOG_MESSAGE, HttpStatus.BAD_REQUEST, e.getMessage());
 
         return new ErrorResponse(e.getMessage());
     }
@@ -29,7 +31,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleNotFoundException(final InvalidOwnerException e) {
-        log.warn(e.getMessage());
+        log.warn(ERROR_LOG_MESSAGE, HttpStatus.BAD_REQUEST, e.getMessage());
 
         return new ErrorResponse(e.getMessage());
     }
@@ -37,7 +39,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleNotFoundException(final NotUniqueEmailException e) {
-        log.warn(e.getMessage());
+        log.warn(ERROR_LOG_MESSAGE, HttpStatus.CONFLICT, e.getMessage());
 
         return new ErrorResponse(e.getMessage());
     }
@@ -45,7 +47,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleOtherException(final Throwable e) {
-        log.warn(e.getMessage());
+        log.warn(ERROR_LOG_MESSAGE, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
 
         return new ErrorResponse(e.getMessage());
     }
@@ -53,7 +55,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleOtherException(final InvalidBookingStatusException e) {
-        log.warn(e.getMessage());
+        log.warn(ERROR_LOG_MESSAGE, HttpStatus.BAD_REQUEST, e.getMessage());
 
         return new ErrorResponse(e.getMessage());
     }
@@ -61,7 +63,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleOtherException(final UserDoesNotHaveBookedItem e) {
-        log.warn(e.getMessage());
+        log.warn(ERROR_LOG_MESSAGE, HttpStatus.BAD_REQUEST, e.getMessage());
 
         return new ErrorResponse(e.getMessage());
     }

@@ -9,8 +9,6 @@ public interface ItemRequestRepositoryInterface extends JpaRepository<ItemReques
 
     List<ItemRequest> findAllByRequestor_IdOrderByCreatedDesc(Long id);
 
-    List<ItemRequest> allOrderByCreatedDesc();
-
     List<ItemRequest> findAllByRequestor_IdIsNotOrderByCreatedDesc(Long id);
 
 }

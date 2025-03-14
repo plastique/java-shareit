@@ -1,6 +1,5 @@
 package ru.practicum.shareit.request;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,14 +19,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ItemRequestController {
 
-    public static final String X_SHARER_USER_ID = "X-Sharer-User-Id";
+    private static final String HEADER_USER_ID = "X-Sharer-User-Id";
 
     private final ItemRequestServiceInterface itemRequestService;
 
     @PostMapping
     public ItemRequestResponseDto createItem(
-            final @RequestHeader(X_SHARER_USER_ID) Long userId,
-            final @Valid @RequestBody ItemRequestCreateDto itemRequestCreateDto
+            final @RequestHeader(HEADER_USER_ID) Long userId,
+            final @RequestBody ItemRequestCreateDto itemRequestCreateDto
     ) {
         itemRequestCreateDto.setUserId(userId);
 
@@ -35,13 +34,13 @@ public class ItemRequestController {
     }
 
     @GetMapping
-    public List<ItemRequestResponseDto> getListByUser(final @RequestHeader(name = X_SHARER_USER_ID) Long userId)
+    public List<ItemRequestResponseDto> getListByUser(final @RequestHeader(name = HEADER_USER_ID) Long userId)
     {
         return itemRequestService.getListByUser(userId);
     }
 
     @GetMapping("/all")
-    public List<ItemRequestResponseDto> getList(final @RequestHeader(name = X_SHARER_USER_ID) Long userId)
+    public List<ItemRequestResponseDto> getList(final @RequestHeader(name = HEADER_USER_ID) Long userId)
     {
         return itemRequestService.getList(userId);
     }

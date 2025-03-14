@@ -2,7 +2,6 @@ package ru.practicum.shareit.item;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
@@ -21,7 +20,6 @@ import ru.practicum.shareit.item.dto.ItemUpdateDto;
 @Controller
 @RequestMapping(path = "/items")
 @RequiredArgsConstructor
-@Slf4j
 @Validated
 public class ItemController {
 
@@ -43,7 +41,6 @@ public class ItemController {
             @PathVariable Long itemId,
             @RequestHeader(name = HEADER_USER_ID) Long userId
     ) {
-
         return itemClient.update(dto, itemId, userId);
     }
 

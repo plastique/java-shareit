@@ -4,13 +4,13 @@ import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class ItemUpdateDto {
-
-    private Long id;
 
     @Nullable
     private String name;

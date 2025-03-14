@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +39,7 @@ import java.util.Objects;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class ItemService implements ItemServiceInterface {
@@ -56,6 +58,7 @@ public class ItemService implements ItemServiceInterface {
 
     @Override
     public ItemDto create(final ItemCreateDto itemDto, final Long userId) {
+        log.info("Create item {} by user {}", itemDto, userId);
 
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new NotFoundException(USER_NOT_FOUND.formatted(userId))
@@ -63,7 +66,7 @@ public class ItemService implements ItemServiceInterface {
 
         ItemRequest itemRequest = null;
 
-        if (itemDto.getRequestId() == null) {
+        if (itemDto.getRequestId() != null) {
             itemRequest = itemRequestRepositoryInterface.findById(itemDto.getRequestId()).orElseThrow(
                     () -> new NotFoundException("Item request with id='%d' not found".formatted(itemDto.getRequestId()))
             );
@@ -86,6 +89,7 @@ public class ItemService implements ItemServiceInterface {
 
     @Override
     public ItemDto update(final ItemUpdateDto itemDto, final Long userId) {
+        log.info("Update item {} by user {}", itemDto, userId);
 
         if (itemDto.getId() == null) {
             throw new EmptyIdException("Item id is empty");
@@ -123,6 +127,7 @@ public class ItemService implements ItemServiceInterface {
     @Override
     @Transactional(readOnly = true)
     public ItemInfoDto findItemById(Long itemId, Long userId) {
+        log.info("Find item by id {} and user {}", itemId, userId);
 
         Item item = itemRepository.findById(itemId).orElseThrow(
                 () -> new NotFoundException(ITEM_NOT_FOUND.formatted(itemId))
@@ -151,6 +156,7 @@ public class ItemService implements ItemServiceInterface {
     @Override
     @Transactional(readOnly = true)
     public List<ItemInfoDto> findItemsByOwner(final Long ownerId) {
+        log.info("Find items by owner {}", ownerId);
 
         User user = userRepository.findById(ownerId).orElseThrow(
                 () -> new NotFoundException(USER_NOT_FOUND.formatted(ownerId))
@@ -195,6 +201,7 @@ public class ItemService implements ItemServiceInterface {
     @Override
     @Transactional(readOnly = true)
     public List<ItemDto> findItemsByText(final String text) {
+        log.info("Find items by text {}", text);
 
         if (text == null || text.isEmpty()) {
             return Collections.emptyList();
@@ -209,6 +216,7 @@ public class ItemService implements ItemServiceInterface {
 
     @Override
     public CommentDto addComment(final Long itemId, final Long authorId, final CommentCreateDto commentDto) {
+        log.info("Add comment {} for item {} by user {}", commentDto, itemId, authorId);
 
         Item item = itemRepository.findById(itemId).orElseThrow(
                 () -> new NotFoundException(ITEM_NOT_FOUND.formatted(itemId))
