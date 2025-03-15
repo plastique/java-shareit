@@ -34,20 +34,18 @@ public class ItemRequestController {
     }
 
     @GetMapping
-    public List<ItemRequestResponseDto> getListByUser(final @RequestHeader(name = HEADER_USER_ID) Long userId)
-    {
+    public List<ItemRequestResponseDto> getListByUser(final @RequestHeader(name = HEADER_USER_ID) Long userId) {
         return itemRequestService.getListByUser(userId);
     }
 
     @GetMapping("/all")
-    public List<ItemRequestResponseDto> getList(final @RequestHeader(name = HEADER_USER_ID) Long userId)
-    {
+    public List<ItemRequestResponseDto> getList(final @RequestHeader(name = HEADER_USER_ID) Long userId) {
         return itemRequestService.getList(userId);
     }
 
     @GetMapping("/{requestId}")
-    public ItemRequestResponseDto getById(final @PathVariable Long requestId)
-    {
+    public ItemRequestResponseDto getById(final @PathVariable Long requestId) {
         return itemRequestService.getById(requestId);
     }
+
 }
