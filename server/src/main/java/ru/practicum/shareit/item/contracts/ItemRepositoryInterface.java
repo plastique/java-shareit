@@ -21,4 +21,6 @@ public interface ItemRepositoryInterface extends JpaRepository<Item, Long> {
     )
     List<Item> findAllByText(String text);
 
+    List<Item> findAllByRequest_IdOrderByIdDesc(Long id);
+
 }

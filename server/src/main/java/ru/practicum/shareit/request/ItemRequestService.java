@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.contracts.ItemRepositoryInterface;
 import ru.practicum.shareit.request.contracts.ItemRequestRepositoryInterface;
 import ru.practicum.shareit.request.contracts.ItemRequestServiceInterface;
 import ru.practicum.shareit.request.dto.ItemRequestCreateDto;
@@ -24,6 +25,7 @@ public class ItemRequestService implements ItemRequestServiceInterface {
 
     private final ItemRequestRepositoryInterface itemRequestRepository;
     private final UserRepositoryInterface userRepository;
+    private final ItemRepositoryInterface itemRepository;
 
     @Override
     public ItemRequestResponseDto create(final ItemRequestCreateDto itemRequestCreateDto) {
@@ -40,7 +42,7 @@ public class ItemRequestService implements ItemRequestServiceInterface {
 
         itemRequestRepository.save(itemRequest);
 
-        return ItemRequestMapper.toItemRequestResponseDto(itemRequest);
+        return ItemRequestMapper.toItemRequestResponseDto(itemRequest, null);
     }
 
     @Override
@@ -53,7 +55,7 @@ public class ItemRequestService implements ItemRequestServiceInterface {
 
         return itemRequestRepository.findAllByRequestor_IdOrderByCreatedDesc(user.getId())
                 .stream()
-                .map(ItemRequestMapper::toItemRequestResponseDto)
+                .map(itemRequest -> ItemRequestMapper.toItemRequestResponseDto(itemRequest, null))
                 .toList();
     }
 
@@ -66,7 +68,7 @@ public class ItemRequestService implements ItemRequestServiceInterface {
                         ? itemRequestRepository.findAll(Sort.by(Sort.Direction.DESC, "created"))
                         : itemRequestRepository.findAllByRequestor_IdIsNotOrderByCreatedDesc(userId)
         ).stream()
-         .map(ItemRequestMapper::toItemRequestResponseDto)
+         .map(itemRequest -> ItemRequestMapper.toItemRequestResponseDto(itemRequest, null))
          .toList();
     }
 
@@ -74,9 +76,14 @@ public class ItemRequestService implements ItemRequestServiceInterface {
     public ItemRequestResponseDto getById(final Long id) {
         log.info("Get itemRequest by id: {}", id);
 
-        return ItemRequestMapper.toItemRequestResponseDto(itemRequestRepository.findById(id).orElseThrow(
+        ItemRequest itemRequest = itemRequestRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("Item request with id: " + id)
-        ));
+        );
+
+        return ItemRequestMapper.toItemRequestResponseDto(
+                itemRequest,
+                itemRepository.findAllByRequest_IdOrderByIdDesc(itemRequest.getId())
+        );
     }
 
 }

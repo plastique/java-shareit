@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -18,4 +19,9 @@ public class ItemRequestResponseDto {
     private String description;
 
     private LocalDateTime created;
+
+    private List<ItemDto> items;
+
+    public record ItemDto(Long id, String name) {
+    }
 }
