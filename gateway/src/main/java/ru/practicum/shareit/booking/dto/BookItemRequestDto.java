@@ -8,10 +8,12 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import ru.practicum.shareit.booking.validator.StartDateIsBeforeEnd;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@StartDateIsBeforeEnd
 public class BookItemRequestDto {
 
     private Long itemId;

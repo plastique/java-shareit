@@ -34,7 +34,6 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
@@ -103,7 +102,7 @@ public class ItemService implements ItemServiceInterface {
                 () -> new NotFoundException(ITEM_NOT_FOUND.formatted(itemDto.getId()))
         );
 
-        if (!Objects.equals(item.getOwner(), user)) {
+        if (item.getOwner().equals(user)) {
             throw new InvalidOwnerException("Owner is not the same user");
         }
 
