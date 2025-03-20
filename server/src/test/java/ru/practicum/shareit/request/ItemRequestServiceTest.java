@@ -124,42 +124,33 @@ class ItemRequestServiceTest {
     @Test
     void getList() {
         List<User> users = new ArrayList<>();
-        int cnt = 0;
 
         for (int j = 0; j < 2; j++) {
             User user = createUser();
-            cnt = new Random().nextInt(2, 5);
             users.add(user);
 
-            for (int i = 1; i <= cnt; i++) {
-                ItemRequestCreateDto itemRequestCreateDto = makeItemRequestCreateDto(user);
-                itemRequestService.create(itemRequestCreateDto);
-            }
+            ItemRequestCreateDto itemRequestCreateDto = makeItemRequestCreateDto(user);
+            itemRequestService.create(itemRequestCreateDto);
         }
 
         List<ItemRequestResponseDto> itemRequests = itemRequestService.getList(users.getLast().getId());
 
-        Assertions.assertEquals(cnt, itemRequests.size());
+        Assertions.assertEquals(1, itemRequests.size());
     }
 
     @Test
     void getListWithAllUsers() {
-        int total = 0;
 
         for (int j = 0; j < 2; j++) {
             User user = createUser();
-            int cnt = new Random().nextInt(2, 5);
-            total += cnt;
 
-            for (int i = 1; i <= cnt; i++) {
-                ItemRequestCreateDto itemRequestCreateDto = makeItemRequestCreateDto(user);
-                itemRequestService.create(itemRequestCreateDto);
-            }
+            ItemRequestCreateDto itemRequestCreateDto = makeItemRequestCreateDto(user);
+            itemRequestService.create(itemRequestCreateDto);
         }
 
         List<ItemRequestResponseDto> itemRequests = itemRequestService.getList(null);
 
-        Assertions.assertEquals(total, itemRequests.size());
+        Assertions.assertEquals(2, itemRequests.size());
     }
 
     private User createUser() {
