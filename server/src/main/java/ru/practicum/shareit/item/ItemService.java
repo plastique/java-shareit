@@ -102,7 +102,7 @@ public class ItemService implements ItemServiceInterface {
                 () -> new NotFoundException(ITEM_NOT_FOUND.formatted(itemDto.getId()))
         );
 
-        if (item.getOwner().equals(user)) {
+        if (!item.getOwner().getId().equals(user.getId())) {
             throw new InvalidOwnerException("Owner is not the same user");
         }
 

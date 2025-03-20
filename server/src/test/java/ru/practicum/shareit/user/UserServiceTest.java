@@ -7,6 +7,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import ru.practicum.shareit.exception.EmptyIdException;
+import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.NotUniqueEmailException;
 import ru.practicum.shareit.user.contracts.UserRepositoryInterface;
 import ru.practicum.shareit.user.dto.UserCreateDto;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -39,6 +42,18 @@ class UserServiceTest {
     }
 
     @Test
+    void createWithExistingEmailReturnThrow() {
+        UserCreateDto userCreateDto = makeUserCreateDto();
+
+        userService.create(userCreateDto);
+
+        Assertions.assertThrowsExactly(
+                NotUniqueEmailException.class,
+                () -> userService.create(userCreateDto)
+        );
+    }
+
+    @Test
     void update() {
         UserCreateDto userCreateDto = makeUserCreateDto();
 
@@ -61,6 +76,57 @@ class UserServiceTest {
     }
 
     @Test
+    void updateWithWrongUserIdReturnThrow() {
+        UserCreateDto userCreateDto = makeUserCreateDto();
+
+        Assertions.assertThrowsExactly(
+                NotFoundException.class,
+                () -> userService.update(
+                        new UserUpdateDto(
+                                new Random().nextLong(),
+                                userCreateDto.getName(),
+                                userCreateDto.getEmail()
+                        )
+                )
+        );
+    }
+
+    @Test
+    void updateWithNonUniqueEmailReturnThrow() {
+
+        UserDto userDto1 = userService.create(makeUserCreateDto());
+        UserDto userDto2 = userService.create(makeUserCreateDto());
+
+        Assertions.assertThrowsExactly(
+                NotUniqueEmailException.class,
+                () -> userService.update(
+                        new UserUpdateDto(
+                                userDto2.getId(),
+                                userDto2.getName(),
+                                userDto1.getEmail()
+                        )
+                )
+        );
+    }
+
+    @Test
+    void updateWithIdIsNullReturnThrow() {
+
+        UserDto userDto = userService.create(makeUserCreateDto());
+
+        Assertions.assertThrowsExactly(
+                EmptyIdException.class,
+                () -> userService.update(
+                        new UserUpdateDto(
+                                null,
+                                userDto.getName(),
+                                userDto.getEmail()
+                        )
+                )
+        );
+    }
+
+    @Test
     void findItemById() {
         UserCreateDto userCreateDto = makeUserCreateDto();
 
@@ -69,6 +135,14 @@ class UserServiceTest {
 
         Assertions.assertNotNull(user);
         Assertions.assertEquals(user.getId(), userDto.getId());
+    }
+
+    @Test
+    void findItemByIdReturnThrow() {
+        Assertions.assertThrowsExactly(
+                NotFoundException.class,
+                () -> userService.findById(new Random().nextLong())
+        );
     }
 
     @Test

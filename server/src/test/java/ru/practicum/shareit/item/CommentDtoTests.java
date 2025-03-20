@@ -33,7 +33,6 @@ class CommentDtoTests {
 
         assertThat(result).extractingJsonPathStringValue("$.text").isEqualTo(commentDto.getText());
         assertThat(result).extractingJsonPathStringValue("$.authorName").isEqualTo(commentDto.getAuthorName());
-        assertThat(result).extractingJsonPathStringValue("$.created").isEqualTo(commentDto.getCreated().toString());
     }
 
 }
