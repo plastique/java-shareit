@@ -158,7 +158,10 @@ class ItemRequestServiceTest {
 
         List<ItemRequestResponseDto> itemRequests = itemRequestService.getList(null);
 
-        Assertions.assertEquals(userRequestsCounts.stream().mapToInt(Integer::intValue).sum(), itemRequests.size());
+        Assertions.assertEquals(
+                userRequestsCounts.stream().mapToInt(Integer::intValue).sum(),
+                itemRequests.size()
+        );
     }
 
     private User createUser() {

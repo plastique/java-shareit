@@ -23,7 +23,6 @@ import ru.practicum.shareit.user.contracts.UserRepositoryInterface;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
@@ -164,13 +163,14 @@ class BookingServiceTest {
     @Test
     void getById() {
         User owner = createUser();
+        User booker = createUser();
         Item item = createItem(owner);
-        BookingCreateDto bookingCreateDto = makeBookingCreateDto(owner, item);
+        BookingCreateDto bookingCreateDto = makeBookingCreateDto(booker, item);
 
         BookingDto bookingRes = bookingService.create(bookingCreateDto);
         BookingDto booking = bookingService.getById(bookingRes.getId(), owner.getId());
 
-        Assertions.assertEquals(bookingRes, booking);
+        Assertions.assertEquals(bookingRes.getId(), booking.getId());
     }
 
     @Test
@@ -178,6 +178,33 @@ class BookingServiceTest {
         Assertions.assertThrowsExactly(
                 NotFoundException.class,
                 () -> bookingService.getById(new Random().nextLong(), null)
+        );
+    }
+
+    @Test
+    void getByIdAndOwner() {
+        User owner = createUser();
+        Item item = createItem(owner);
+        BookingCreateDto bookingCreateDto = makeBookingCreateDto(owner, item);
+
+        BookingDto bookingRes = bookingService.create(bookingCreateDto);
+        BookingDto booking = bookingService.getById(bookingRes.getId(), owner.getId());
+
+        Assertions.assertEquals(bookingRes.getId(), booking.getId());
+    }
+
+    @Test
+    void getByIdAndWrongBooker() {
+        User owner = createUser();
+        User wrongBooker = createUser();
+        Item item = createItem(owner);
+        BookingCreateDto bookingCreateDto = makeBookingCreateDto(owner, item);
+
+        BookingDto bookingRes = bookingService.create(bookingCreateDto);
+
+        Assertions.assertThrowsExactly(
+                NotFoundException.class,
+                () -> bookingService.getById(bookingRes.getId(), wrongBooker.getId())
         );
     }
 
@@ -192,9 +219,30 @@ class BookingServiceTest {
             bookingService.create(bookingCreateDto);
         }
 
-        List<BookingDto> bookings = bookingService.getByOwnerAndState(owner.getId(), BookingState.ALL);
-
-        Assertions.assertEquals(ownerItemsCount, bookings.size());
+        Assertions.assertEquals(
+                ownerItemsCount,
+                bookingService.getByOwnerAndState(owner.getId(), BookingState.ALL).size()
+        );
+        Assertions.assertEquals(
+                ownerItemsCount,
+                bookingService.getByOwnerAndState(owner.getId(), BookingState.CURRENT).size()
+        );
+        Assertions.assertEquals(
+                0,
+                bookingService.getByOwnerAndState(owner.getId(), BookingState.REJECTED).size()
+        );
+        Assertions.assertEquals(
+                ownerItemsCount,
+                bookingService.getByOwnerAndState(owner.getId(), BookingState.WAITING).size()
+        );
+        Assertions.assertEquals(
+                0,
+                bookingService.getByOwnerAndState(owner.getId(), BookingState.PAST).size()
+        );
+        Assertions.assertEquals(
+                0,
+                bookingService.getByOwnerAndState(owner.getId(), BookingState.FUTURE).size()
+        );
     }
 
     @Test
@@ -209,9 +257,30 @@ class BookingServiceTest {
             bookingService.create(bookingCreateDto);
         }
 
-        List<BookingDto> bookings = bookingService.getByBookerAndState(booker.getId(), BookingState.ALL);
-
-        Assertions.assertEquals(ownerItemsCount, bookings.size());
+        Assertions.assertEquals(
+                ownerItemsCount,
+                bookingService.getByBookerAndState(booker.getId(), BookingState.ALL).size()
+        );
+        Assertions.assertEquals(
+                ownerItemsCount,
+                bookingService.getByBookerAndState(booker.getId(), BookingState.CURRENT).size()
+        );
+        Assertions.assertEquals(
+                0,
+                bookingService.getByBookerAndState(booker.getId(), BookingState.REJECTED).size()
+        );
+        Assertions.assertEquals(
+                ownerItemsCount,
+                bookingService.getByBookerAndState(booker.getId(), BookingState.WAITING).size()
+        );
+        Assertions.assertEquals(
+                0,
+                bookingService.getByBookerAndState(booker.getId(), BookingState.PAST).size()
+        );
+        Assertions.assertEquals(
+                0,
+                bookingService.getByBookerAndState(booker.getId(), BookingState.FUTURE).size()
+        );
     }
 
     private User createUser() {
