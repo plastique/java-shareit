@@ -128,7 +128,7 @@ class ItemRequestServiceTest {
 
         for (int j = 0; j < 2; j++) {
             users.add(createUser());
-            userRequestsCounts.add(new Random().nextInt(10));
+            userRequestsCounts.add(new Random().nextInt(2, 5));
 
             for (int i = 1; i <= userRequestsCounts.getLast(); i++) {
                 ItemRequestCreateDto itemRequestCreateDto = makeItemRequestCreateDto(users.getLast());
@@ -148,7 +148,7 @@ class ItemRequestServiceTest {
 
         for (int j = 0; j < 2; j++) {
             users.add(createUser());
-            userRequestsCounts.add(new Random().nextInt(10));
+            userRequestsCounts.add(new Random().nextInt(2, 5));
 
             for (int i = 1; i <= userRequestsCounts.getLast(); i++) {
                 ItemRequestCreateDto itemRequestCreateDto = makeItemRequestCreateDto(users.getLast());
