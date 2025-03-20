@@ -124,44 +124,42 @@ class ItemRequestServiceTest {
     @Test
     void getList() {
         List<User> users = new ArrayList<>();
-        List<Integer> userRequestsCounts = new ArrayList<>();
+        int cnt = 0;
 
         for (int j = 0; j < 2; j++) {
-            users.add(createUser());
-            userRequestsCounts.add(new Random().nextInt(2, 5));
+            User user = createUser();
+            cnt = new Random().nextInt(2, 5);
+            users.add(user);
 
-            for (int i = 1; i <= userRequestsCounts.getLast(); i++) {
-                ItemRequestCreateDto itemRequestCreateDto = makeItemRequestCreateDto(users.getLast());
+            for (int i = 1; i <= cnt; i++) {
+                ItemRequestCreateDto itemRequestCreateDto = makeItemRequestCreateDto(user);
                 itemRequestService.create(itemRequestCreateDto);
             }
         }
 
-        List<ItemRequestResponseDto> itemRequests = itemRequestService.getList(users.getFirst().getId());
+        List<ItemRequestResponseDto> itemRequests = itemRequestService.getList(users.getLast().getId());
 
-        Assertions.assertEquals(userRequestsCounts.getLast(), itemRequests.size());
+        Assertions.assertEquals(cnt, itemRequests.size());
     }
 
     @Test
     void getListWithAllUsers() {
-        List<User> users = new ArrayList<>();
-        List<Integer> userRequestsCounts = new ArrayList<>();
+        int total = 0;
 
         for (int j = 0; j < 2; j++) {
-            users.add(createUser());
-            userRequestsCounts.add(new Random().nextInt(2, 5));
+            User user = createUser();
+            int cnt = new Random().nextInt(2, 5);
+            total += cnt;
 
-            for (int i = 1; i <= userRequestsCounts.getLast(); i++) {
-                ItemRequestCreateDto itemRequestCreateDto = makeItemRequestCreateDto(users.getLast());
+            for (int i = 1; i <= cnt; i++) {
+                ItemRequestCreateDto itemRequestCreateDto = makeItemRequestCreateDto(user);
                 itemRequestService.create(itemRequestCreateDto);
             }
         }
 
         List<ItemRequestResponseDto> itemRequests = itemRequestService.getList(null);
 
-        Assertions.assertEquals(
-                userRequestsCounts.stream().mapToInt(Integer::intValue).sum(),
-                itemRequests.size()
-        );
+        Assertions.assertEquals(total, itemRequests.size());
     }
 
     private User createUser() {
