@@ -1,6 +1,7 @@
 package ru.practicum.shareit.request;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -40,6 +41,13 @@ class ItemRequestServiceTest {
 
     @Autowired
     ItemRequestService itemRequestService;
+
+    @BeforeEach
+    void setUp() {
+        userRepository.deleteAll();
+        itemRepository.deleteAll();
+        itemRequestRepository.deleteAll();
+    }
 
     @Test
     void create() {
